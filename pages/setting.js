@@ -6,7 +6,6 @@ import {
   Text,
   useColorScheme,
   View,
-  AsyncStorageStatic
 } from 'react-native';
 
 import { Icon, ListItem  } from 'react-native-elements';
