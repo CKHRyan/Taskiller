@@ -1,7 +1,7 @@
 import React, { useContext, useState, useEffect } from 'react';
-import TaskForm from './frame/taskForm';
-import { TaskContext } from '../data/context';
-import { editTask, findTaskById } from '../service/taskManagement';
+import TaskForm from '../frame/taskForm';
+import { TaskContext } from '../../data/context';
+import { editTask, findTaskById } from '../../service/taskManagement';
 
 export default TaskEditor = (props) => {
   const { taskList, setTaskList } = useContext(TaskContext);
@@ -11,9 +11,9 @@ export default TaskEditor = (props) => {
     setTaskDetail(await findTaskById(props.route.params.id));
   }, []);
 
-  const requestEditTask = async (name, deadline, remindMe, description) => {
+  const requestEditTask = async (name, deadline, priority, description) => {
     try {
-      editTask(props.route.params.id, name, deadline, description, (tasks) => {
+      editTask(props.route.params.id, name, deadline, priority, description, (tasks) => {
         setTaskList(tasks);
       });
       props.navigation.popToTop();
@@ -25,7 +25,7 @@ export default TaskEditor = (props) => {
 
   return (
     taskDetail
-    ? <TaskForm processForm={ requestEditTask} navigation={props.navigation} data={ taskDetail } />
+    ? <TaskForm processForm={ requestEditTask } navigation={props.navigation} data={ taskDetail } />
     : <></>
   );
 };

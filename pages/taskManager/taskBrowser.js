@@ -1,4 +1,4 @@
-import React, { useState, useContext } from 'react';
+import React, { useState, useContext, useEffect } from 'react';
 import {
   SafeAreaView,
   ScrollView,
@@ -10,15 +10,36 @@ import {
   TouchableOpacity,
 } from 'react-native';
 
-import { Header, Tab, Card, Button, Icon, SearchBar } from 'react-native-elements';
+import dateTime from 'date-time';
 
-import { TaskContext } from '../data/context';
-import { completeTask, undoTask } from '../service/taskManagement';
+import { Header, Tab, Card, Button, Icon, SearchBar, BottomSheet, ListItem, CheckBox } from 'react-native-elements';
+
+import { TaskContext } from '../../data/context';
+import { completeTask, undoTask, searchTasks, sortTasks } from '../../service/taskManagement';
 
 export default TaskBrowser = (props) => {
   const { taskList, setTaskList } = useContext(TaskContext);
   const [tabValue, setTabValue] = useState(0);
   const [search, setSearch] = useState("");
+  const [showSortTable, setShowSortTable] = useState(false);
+  const [sortOrder, setSortOrder] = useState("asc");
+  const handleTaskSort = async (field, order) => {
+    await sortTasks(field, order, (tasks) => {
+      setTaskList(tasks);
+    });
+    setShowSortTable(false);
+  }
+  const sortTable = [
+    { title: 'ID', onPress: async () => handleTaskSort("id", sortOrder) },
+    { title: 'Name', onPress: async () => handleTaskSort("name", sortOrder) },
+    { title: 'Deadline', onPress: async () => handleTaskSort("deadline", sortOrder) },
+    { title: 'Priority', onPress: async () => handleTaskSort("priority", sortOrder) },
+    {
+      title: 'Cancel',
+      containerStyle: { backgroundColor: '#ddd' },
+      onPress: () => setShowSortTable(false),
+    },
+  ];
 
   const requestCompleteTask = async (id) => {
     await completeTask(id, (tasks) => {
@@ -31,6 +52,10 @@ export default TaskBrowser = (props) => {
       setTaskList(tasks);
     })
   }
+
+  useEffect(async () => {
+    setTaskList(await searchTasks(search));
+  }, [search])
 
   return (
     <View style={{ flex: 1 }}>
@@ -98,9 +123,14 @@ export default TaskBrowser = (props) => {
                     </View>
                     <Card.Divider/>
                     <Text style={{fontSize: 16}}>
+                      Priority:&nbsp;
+                      {(item.priority !== undefined && item.priority >= 1 && item.priority <= 3) ?
+                       (item.priority === 3 ? "High" : (item.priority === 2 ? "Medium" : "Low")) : "nil" }
+                    </Text>
+                    <Text style={{fontSize: 16}}>
                       Deadline:&nbsp;
                       {(item.deadline !== undefined && item.deadline !== "") ?
-                      item.deadline : "nil" }
+                      dateTime({date: new Date(item.deadline)}) : "nil" }
                     </Text>
                     <Text style={{fontSize: 16, marginBottom: 10}}>
                       Description:&nbsp;
@@ -115,7 +145,25 @@ export default TaskBrowser = (props) => {
         </View>
       </ScrollView>
 
-      <View style={{ alignSelf: 'flex-end', position: "absolute", bottom: 0 }}>
+      <View style={{ flexDirection: 'row', alignSelf: 'flex-end', position: "absolute", bottom: 0 }}>
+        <TouchableOpacity
+          style={{
+              borderWidth:1,
+              borderColor:'rgba(0,0,0,0.2)',
+              alignItems:'center',
+              justifyContent:'center',
+              width:75,
+              height:75,
+              backgroundColor:'#1A1A1A',
+              borderRadius:50,
+              marginRight: 5,
+              marginBottom: 15
+            }}
+          onPress={() => setShowSortTable(true)}
+        >
+          <Icon name={"sort"}  size={40} color="#fff" />
+        </TouchableOpacity>
+
         <TouchableOpacity
           style={{
               borderWidth:1,
@@ -134,6 +182,44 @@ export default TaskBrowser = (props) => {
           <Icon name={"add"}  size={40} color="#fff" />
         </TouchableOpacity>
       </View>
+
+      <BottomSheet
+        isVisible={showSortTable}
+        containerStyle={{ backgroundColor: 'rgba(0.5, 0.25, 0, 0)' }}
+      >
+        <View style={{flexDirection: 'row', justifyContent: 'center', backgroundColor: "#fff"}}>
+          <CheckBox
+            center
+            title='Ascending'
+            checked={sortOrder==="asc"}
+            iconType='material'
+            checkedIcon="check-box"
+            uncheckedIcon="check-box-outline-blank"
+            textStyle={{fontSize: 16}}
+            containerStyle={{backgroundColor: 'rgba(0,0,0,0)', borderColor: 'rgba(0,0,0,0)'}}
+            onIconPress={() => setSortOrder("asc")}
+          />
+
+          <CheckBox
+            center
+            title='Descending'
+            checked={sortOrder==="desc"}
+            iconType='material'
+            checkedIcon="check-box"
+            uncheckedIcon="check-box-outline-blank"
+            textStyle={{fontSize: 16}}
+            containerStyle={{backgroundColor: 'rgba(0,0,0,0)', borderColor: 'rgba(0,0,0,0)'}}
+            onIconPress={() => setSortOrder("desc")}
+          />
+        </View>
+        {sortTable.map((sortItem, index) => (
+          <ListItem key={index} containerStyle={sortItem.containerStyle} onPress={sortItem.onPress}>
+            <ListItem.Content>
+              <ListItem.Title style={sortItem.titleStyle}>{sortItem.title}</ListItem.Title>
+            </ListItem.Content>
+          </ListItem>
+        ))}
+      </BottomSheet>
     </View>
   );
 };

@@ -23,14 +23,14 @@ import {
 } from 'react-native';
 import { Header } from 'react-native-elements';
 
-import TaskBrowser from './pages/taskBrowser';
-import TaskAdder from './pages/taskAdder';
-import TaskEditor from './pages/taskEditor';
-import Setting from './pages/setting';
+import TaskBrowser from './pages/taskManager/taskBrowser';
+import TaskAdder from './pages/taskManager/taskAdder';
+import TaskEditor from './pages/taskManager/taskEditor';
+import Setting from './pages/Setting/setting';
+import About from './pages/Setting/about';
 import { TaskContext } from './data/context';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { intializeTaskList } from './service/taskManagement';
-import { loadItem } from './service/storage';
+import { intialization, getAllTasks, sortTasks } from './service/taskManagement';
 
 const Stack = createStackNavigator();
 
@@ -43,12 +43,12 @@ const App = (props) => {
   const [search, setSearch] = useState("");
 
   useEffect(async () => {
-    let tasks = await loadItem('@taskList');
+    let tasks = await getAllTasks();
     if (tasks) {
       setTaskList(tasks);
     }
     else {
-      await intializeTaskList();
+      await intialization();
     }
     console.log(tasks);
   }, []);
@@ -58,7 +58,7 @@ const App = (props) => {
       <StatusBar barStyle='light-content' />
       <Header
         backgroundColor="#1A1A1A"
-        leftComponent={routeName !== "Setting" ? 
+        leftComponent={!["Setting", "About"].includes(routeName) ? 
           { icon: 'menu', color: '#fff', size: 30,
             onPress: () => { 
               navigationRef.current.navigate("Setting");
@@ -90,6 +90,7 @@ const App = (props) => {
             <Stack.Screen name="Create Task" component={TaskAdder} />
             <Stack.Screen name="Edit Task" component={TaskEditor} />
             <Stack.Screen name="Setting" component={Setting} />
+            <Stack.Screen name="About" component={About} />
           </Stack.Navigator>
         </NavigationContainer>
       </TaskContext.Provider>

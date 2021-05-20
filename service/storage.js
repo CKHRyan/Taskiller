@@ -19,9 +19,15 @@ export const saveItem = async (key, value) => {
 
 export const loadItem = async (key) => {
   try {
-    return JSON.parse(await AsyncStorage.getItem(key));
+    let item = await AsyncStorage.getItem(key);
+    try {
+      return JSON.parse(item);
+    }
+    catch(err) {
+      return item;
+    }
   }
   catch(err) {
-    throw new Error(err);
+    console.log(err);
   }
 }

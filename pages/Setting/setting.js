@@ -21,13 +21,18 @@ export default Setting = (props) => {
       }
     },
     items: [
+      /*
       {
         title: 'Notification',
         icon: 'notifications'
       },
+      */
       {
         title: 'About',
-        icon: 'computer'
+        icon: 'computer',
+        navigate: () => {
+          props.navigation.navigate("About");
+        }
       },
       /*
       {
@@ -50,7 +55,7 @@ export default Setting = (props) => {
         <View style={{marginTop: 20, paddingHorizontal: 15, flex: 1}}>
         {
           list.items.map((item, i) => (
-            <ListItem key={i} bottomDivider>
+            <ListItem key={i} bottomDivider onPress={item.navigate}>
               <Icon name={item.icon} size={list.style.icon.iconSize} />
               <ListItem.Content>
                 <ListItem.Title style={list.style.title}>{item.title}</ListItem.Title>
@@ -64,4 +69,4 @@ export default Setting = (props) => {
       </ScrollView>
     </View>
   );
-};
+}

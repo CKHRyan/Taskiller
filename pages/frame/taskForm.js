@@ -1,4 +1,4 @@
-import React, { useState, useContext, useEffect } from 'react';
+import React, { useState, useContext, useEffect, forwardRef } from 'react';
 import {
   ScrollView,
   StatusBar,
@@ -6,22 +6,29 @@ import {
   Text,
   useColorScheme,
   View,
+  TouchableOpacity
 } from 'react-native';
 
 import { Header, ButtonGroup, Icon, Input, Tab  } from 'react-native-elements';
+import DateTimePickerModal from "react-native-modal-datetime-picker";
+import ModalDropdown from 'react-native-modal-dropdown';
+import { TextInput } from 'react-native-gesture-handler';
+import dateTime from 'date-time';
 
 export default TaskForm = (props) => {
 
   const [name, setName] = useState("");
-  const [deadline, setDeadline] = useState("");
-  const [remindMe, setRemindMe] = useState("");
+  const [deadline, setDeadline] = useState(new Date());
+  //const [remindMe, setRemindMe] = useState("");
+  const [priority, setPriority] = useState(1);
   const [description, setDescription] = useState("");
+  const [showDateTimePicker, setShowDateTimePicker] = useState(false);
 
   useEffect(() => {
     if (props.data) {
       console.log("DATA", props.data);
       setName(props.data.name);
-      setDeadline(props.data.deadline);
+      setDeadline(new Date(props.data.deadline));
       setDescription(props.data.description);
     }
   }, []);
@@ -35,51 +42,69 @@ export default TaskForm = (props) => {
 
       <ScrollView contentInsetAdjustmentBehavior="automatic" >
 
-        <View style={{marginTop: 20, paddingHorizontal: 15, flex: 1}}>
-          <Input
-            placeholder='Task name'
-            style={{ padding: 0 }}
-            label="Task"
-            labelStyle={{fontSize: 20, color: "#555"}}
-            value={name}
-            onChangeText={value => setName(value)}
-          />
+        <View style={{marginTop: 20, paddingHorizontal: 15, flex: 1, fontSize: 20}}>
+          <View style={{marginVertical: 10}}>
+            <Text style={{fontSize: 20, fontWeight: 'bold'}}>Task</Text>
+            <TextInput 
+              placeholder='Name of the task...'
+              value={name}
+              onChangeText={value => setName(value)} 
+              style={{fontSize: 18, paddingHorizontal: 0, paddingVertical: 5, borderBottomColor: "#555", borderBottomWidth: 1}}
+            />
+          </View>
+          
+          <View style={{marginVertical: 10}}>
+            <Text style={{fontSize: 20, fontWeight: 'bold'}}>Deadline</Text>
+            <TouchableOpacity onPress={() => setShowDateTimePicker(true)}>
+              <TextInput
+                editable={false}
+                value={dateTime({date: deadline})}
+                style={{color: "#000", fontSize: 18, paddingHorizontal: 0, paddingVertical: 5, borderBottomColor: "#555", borderBottomWidth: 1}}
+              />
+            </TouchableOpacity>
+            <DateTimePickerModal
+              isVisible={showDateTimePicker}
+              mode="datetime"
+              onConfirm={setDeadline}
+              onCancel={() => setShowDateTimePicker(false)}
+            />
+          </View>
 
-          <Input
-            placeholder='DD/MM/YYYY'
-            style={{ padding: 0 }}
-            label="Deadline"
-            labelStyle={{fontSize: 20, color: "#555"}}
-            value={deadline}
-            onChangeText={value => setDeadline(value)}
-          />
+          <View style={{marginVertical: 10}}>
+            <Text style={{fontSize: 20, fontWeight: 'bold'}}>Priority</Text>
+            <ModalDropdown
+              options={['Low', 'Medium', 'High']}
+              onSelect={(index, value) => {
+                setPriority(index);
+              }}
+              isFullWidth={true}
+              textStyle={{fontSize: 18}}
+              dropdownTextStyle={{fontSize: 18}}
+              style={{paddingHorizontal: 0, paddingVertical: 5, borderBottomColor: "#555", borderBottomWidth: 1}}
+              
+            />
+          </View>
 
-          <Input
-            placeholder='Remind me'
-            style={{ padding: 0 }}
-            label="time/period"
-            labelStyle={{fontSize: 20, color: "#555"}}
-            value={remindMe}
-            onChangeText={value => setRemindMe(value)}
-          />
-
-          <Input
-            placeholder='Description'
-            style={{ padding: 0 }}
-            label="Task details..."
-            labelStyle={{fontSize: 20, color: "#555"}}
-            value={description}
-            onChangeText={value => setDescription(value)}
-          />
+          <View style={{marginVertical: 10}}>
+            <Text style={{fontSize: 20, fontWeight: 'bold'}}>Description</Text>
+            <TextInput 
+              placeholder='Detail of the task...'
+              multiline={true}
+              numberOfLines={2}
+              value={description}
+              onChangeText={value => setDescription(value)}
+              style={{fontSize: 18, paddingHorizontal: 0, paddingVertical: 5, borderBottomColor: "#555", borderBottomWidth: 1}}
+            />
+          </View>
         </View>
 
       </ScrollView>
 
-      <View style={{ position: "absolute", bottom: 0, left: 0, right: 0 }}>
+      <View style={{ position: "absolute", bottom: 0, left: 0, right: 0, backgroundColor: "#FAFAFA" }}>
         <Tab 
           disableIndicator={true} 
           onChange={(value) => value === 1 ? 
-            props.processForm(name, deadline, remindMe, description) : cancel() 
+            props.processForm(name, deadline.toISOString(), priority, description) : cancel() 
           }
         >
           <Tab.Item 
