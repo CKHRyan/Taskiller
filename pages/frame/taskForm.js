@@ -9,7 +9,7 @@ import {
   TouchableOpacity
 } from 'react-native';
 
-import { Header, ButtonGroup, Icon, Input, Tab  } from 'react-native-elements';
+import { Header, ButtonGroup, Icon, Input, Tab, Overlay  } from 'react-native-elements';
 import DateTimePickerModal from "react-native-modal-datetime-picker";
 import ModalDropdown from 'react-native-modal-dropdown';
 import { TextInput } from 'react-native-gesture-handler';
@@ -20,18 +20,26 @@ export default TaskForm = (props) => {
   const [name, setName] = useState("");
   const [deadline, setDeadline] = useState(new Date());
   //const [remindMe, setRemindMe] = useState("");
-  const [priority, setPriority] = useState(1);
+  const [priority, setPriority] = useState(0);
   const [description, setDescription] = useState("");
   const [showDateTimePicker, setShowDateTimePicker] = useState(false);
+  const [showErrorMessage, setShowErrorMessage] = useState({show: false, message: ""});
 
   useEffect(() => {
     if (props.data) {
-      console.log("DATA", props.data);
       setName(props.data.name);
       setDeadline(new Date(props.data.deadline));
       setDescription(props.data.description);
     }
   }, []);
+
+  const handleProcessForm = async () => {
+    if (name === "" || priority === 0) {
+      setShowErrorMessage({show: true, message: "Please fill in all the required field."});
+      return;
+    }
+    props.processForm(name, deadline.toISOString(), priority, description);
+  }
 
   const cancel = async () => {
     props.navigation.goBack();
@@ -44,7 +52,7 @@ export default TaskForm = (props) => {
 
         <View style={{marginTop: 20, paddingHorizontal: 15, flex: 1, fontSize: 20}}>
           <View style={{marginVertical: 10}}>
-            <Text style={{fontSize: 20, fontWeight: 'bold'}}>Task</Text>
+            <Text style={{fontSize: 20, fontWeight: 'bold'}}>Task *</Text>
             <TextInput 
               placeholder='Name of the task...'
               value={name}
@@ -54,7 +62,7 @@ export default TaskForm = (props) => {
           </View>
           
           <View style={{marginVertical: 10}}>
-            <Text style={{fontSize: 20, fontWeight: 'bold'}}>Deadline</Text>
+            <Text style={{fontSize: 20, fontWeight: 'bold'}}>Deadline *</Text>
             <TouchableOpacity onPress={() => setShowDateTimePicker(true)}>
               <TextInput
                 editable={false}
@@ -71,7 +79,7 @@ export default TaskForm = (props) => {
           </View>
 
           <View style={{marginVertical: 10}}>
-            <Text style={{fontSize: 20, fontWeight: 'bold'}}>Priority</Text>
+            <Text style={{fontSize: 20, fontWeight: 'bold'}}>Priority *</Text>
             <ModalDropdown
               options={['Low', 'Medium', 'High']}
               onSelect={(index, value) => {
@@ -104,7 +112,7 @@ export default TaskForm = (props) => {
         <Tab 
           disableIndicator={true} 
           onChange={(value) => value === 1 ? 
-            props.processForm(name, deadline.toISOString(), priority, description) : cancel() 
+            handleProcessForm() : cancel() 
           }
         >
           <Tab.Item 
@@ -117,6 +125,14 @@ export default TaskForm = (props) => {
           />
         </Tab>
       </View>
+
+      <Overlay 
+        isVisible={showErrorMessage.show} 
+        onBackdropPress={() => {setShowErrorMessage({show: false, message: ""})}}
+        overlayStyle={{paddingVertical: 50, paddingHorizontal: 30}}
+      >
+        <Text style={{fontSize: 18}}>{showErrorMessage.message}</Text>
+      </Overlay>
     </View>
   );
 };

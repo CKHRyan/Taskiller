@@ -15,7 +15,7 @@ import dateTime from 'date-time';
 import { Header, Tab, Card, Button, Icon, SearchBar, BottomSheet, ListItem, CheckBox } from 'react-native-elements';
 
 import { TaskContext } from '../../data/context';
-import { completeTask, undoTask, searchTasks, sortTasks } from '../../service/taskManagement';
+import { completeTask, undoTask, removeTask, searchTasks, sortTasks } from '../../service/taskManagement';
 
 export default TaskBrowser = (props) => {
   const { taskList, setTaskList } = useContext(TaskContext);
@@ -56,6 +56,12 @@ export default TaskBrowser = (props) => {
   useEffect(async () => {
     setTaskList(await searchTasks(search));
   }, [search])
+
+  const requestRemoveTask = async (id) => {
+    await removeTask(id, (tasks) => {
+      setTaskList(tasks);
+    })
+  }
 
   return (
     <View style={{ flex: 1 }}>
@@ -104,12 +110,20 @@ export default TaskBrowser = (props) => {
               else {
                 items = context.taskList.doneItems;
                 buttons = (id) => (
-                  <Button
-                    icon={<Icon name="undo" size={30} color="black" /> }
-                    type="clear"
-                    buttonStyle={{ padding: 0, marginRight: 5 }}
-                    onPress={() => requestUndoTask(id)}
-                  />
+                  <>
+                    <Button
+                      icon={<Icon name="undo" size={30} color="black" /> }
+                      type="clear"
+                      buttonStyle={{ padding: 0, marginRight: 5 }}
+                      onPress={() => requestUndoTask(id)}
+                    />
+                      <Button
+                      icon={<Icon name="delete" size={30} color="black" /> }
+                      type="clear"
+                      buttonStyle={{ padding: 0 }}
+                      onPress={() => requestRemoveTask(id)}
+                    />
+                  </>
                 )
               }
               return (

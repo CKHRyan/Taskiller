@@ -47,7 +47,6 @@ export const organizeTasks = async(tasks) => {
     else if (typeof(a_field) === "string" && typeof(b_field) === "string") {
       a_field = a_field.toLowerCase();
       b_field = b_field.toLowerCase();
-      console.log(a, b);
     }
     if (a_field < b_field) {
       return -1 * order;
@@ -190,6 +189,20 @@ export const editTask = async (id, name, deadline, priority, description, callba
   }
 }
 
-export const deleteTask = async () => {
-
+export const removeTask = async (id, callback) => {
+  try {
+    let tasks = await getAllTasks();
+    for (let i = 0; i < tasks.doneItems.length; i++) {
+      if (tasks.doneItems[i].id === id) {
+        tasks.doneItems.splice(i, 1);
+        await saveAllTasks(tasks);
+        callback(tasks);
+        return;
+      }
+    }
+    throw new Error(`Task (id: ${id}) is not found or is uncompleted`);
+  }
+  catch(err) {
+    console.log(err);
+  }
 }
