@@ -53,6 +53,23 @@ const App = (props) => {
     console.log(tasks);
   }, []);
 
+  const horizontalAnimation = {
+    cardStyleInterpolator: ({ current, layouts }) => {
+      return {
+        cardStyle: {
+          transform: [
+            {
+              translateX: current.progress.interpolate({
+                inputRange: [0, 1],
+                outputRange: [-layouts.screen.width, 0],
+              }),
+            },
+          ],
+        },
+      };
+    },
+  };
+
   return (
     <SafeAreaView style={{ flex: 1 }}>
       <StatusBar barStyle='light-content' />
@@ -89,7 +106,7 @@ const App = (props) => {
             <Stack.Screen name="Task Manager" component={TaskBrowser} />
             <Stack.Screen name="Create Task" component={TaskAdder} />
             <Stack.Screen name="Edit Task" component={TaskEditor} />
-            <Stack.Screen name="Setting" component={Setting} />
+            <Stack.Screen name="Setting" component={Setting} options={horizontalAnimation} />
             <Stack.Screen name="About" component={About} />
           </Stack.Navigator>
         </NavigationContainer>

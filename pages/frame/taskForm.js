@@ -20,7 +20,7 @@ export default TaskForm = (props) => {
   const [name, setName] = useState("");
   const [deadline, setDeadline] = useState(new Date());
   //const [remindMe, setRemindMe] = useState("");
-  const [priority, setPriority] = useState(0);
+  const [priority, setPriority] = useState(-1);
   const [description, setDescription] = useState("");
   const [showDateTimePicker, setShowDateTimePicker] = useState(false);
   const [showErrorMessage, setShowErrorMessage] = useState({show: false, message: ""});
@@ -29,12 +29,13 @@ export default TaskForm = (props) => {
     if (props.data) {
       setName(props.data.name);
       setDeadline(new Date(props.data.deadline));
+      setPriority(props.data.priority);
       setDescription(props.data.description);
     }
   }, []);
 
   const handleProcessForm = async () => {
-    if (name === "" || priority === 0) {
+    if (name === "" || priority === -1) {
       setShowErrorMessage({show: true, message: "Please fill in all the required field."});
       return;
     }
@@ -81,6 +82,7 @@ export default TaskForm = (props) => {
           <View style={{marginVertical: 10}}>
             <Text style={{fontSize: 20, fontWeight: 'bold'}}>Priority *</Text>
             <ModalDropdown
+              defaultValue={['Low', 'Medium', 'High'][priority]}
               options={['Low', 'Medium', 'High']}
               onSelect={(index, value) => {
                 setPriority(index);
