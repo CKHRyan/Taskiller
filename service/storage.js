@@ -1,4 +1,5 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { getAllTasks, intialization } from './taskManagement';
 
 export const saveItem = async (key, value) => {
   try {
@@ -29,5 +30,14 @@ export const loadItem = async (key) => {
   }
   catch(err) {
     console.log(err);
+    return null;
   }
+}
+
+export const reset = async (callback) => {
+  let keys = await AsyncStorage.getAllKeys();
+  AsyncStorage.multiRemove(keys);
+  await intialization();
+  callback(await getAllTasks());
+  console.log("The storage is reset successfully");
 }

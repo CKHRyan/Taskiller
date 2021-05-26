@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useContext } from 'react';
 import {
   ScrollView,
   StatusBar,
@@ -9,8 +9,11 @@ import {
 } from 'react-native';
 
 import { Icon, ListItem  } from 'react-native-elements';
+import { TaskContext } from '../../data/context';
+import { reset } from '../../service/storage';
 
 export default Setting = (props) => {
+  const { taskList, setTaskList } = useContext(TaskContext);
   const list = {
     style: {
       title: {
@@ -30,8 +33,16 @@ export default Setting = (props) => {
       {
         title: 'About',
         icon: 'computer',
-        navigate: () => {
+        onPress: () => {
           props.navigation.navigate("About");
+        }
+      },
+      {
+        title: 'Initialization',
+        icon: 'wifi-protected-setup',
+        onPress: async () => {
+          await reset((tasks) => setTaskList(tasks));
+          props.navigation.popToTop();
         }
       },
       /*
@@ -55,7 +66,7 @@ export default Setting = (props) => {
         <View style={{marginTop: 20, paddingHorizontal: 15, flex: 1}}>
         {
           list.items.map((item, i) => (
-            <ListItem key={i} bottomDivider onPress={item.navigate}>
+            <ListItem key={i} bottomDivider onPress={item.onPress}>
               <Icon name={item.icon} size={list.style.icon.iconSize} />
               <ListItem.Content>
                 <ListItem.Title style={list.style.title}>{item.title}</ListItem.Title>

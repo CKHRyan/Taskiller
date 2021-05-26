@@ -51,7 +51,7 @@ export default TaskForm = (props) => {
 
       <ScrollView contentInsetAdjustmentBehavior="automatic" >
 
-        <View style={{marginTop: 20, paddingHorizontal: 15, flex: 1, fontSize: 20}}>
+        <View style={{marginTop: 20, paddingHorizontal: 15, paddingBottom: 100, flex: 1, fontSize: 20}}>
           <View style={{marginVertical: 10}}>
             <Text style={{fontSize: 20, fontWeight: 'bold'}}>Task *</Text>
             <TextInput 

@@ -5,13 +5,19 @@ const SortPropsKey = "@sortProps";
 
 export const intialization = async () => {
   await saveItem(TaskListKey, {todoItems: [], doneItems: [], latestID: 0});
-  await saveItem({field: "id", order: "asc"});
+  await saveItem(SortPropsKey, {field: "id", order: "asc"});
 }
 
 export const getAllTasks = async () => {
-  let tasks = await loadItem(TaskListKey);
-  tasks = await organizeTasks(tasks);
-  return tasks;
+  try {
+    let tasks = await loadItem(TaskListKey);
+    tasks = await organizeTasks(tasks);
+    return tasks;
+  }
+  catch(err) {
+    console.log("Task collection not found");
+    return null;
+  }
 }
 
 export const saveAllTasks = async (tasks) => {
@@ -93,7 +99,14 @@ export const sortTasks = async (field, order="asc", callback) => {
 }
 
 export const getSortProps = async () => {
-  return await loadItem(SortPropsKey);
+  try {
+    let sortProps = await loadItem(SortPropsKey);
+    return sortProps;
+  }
+  catch(err) {
+    console.log("Sort props collection not found");
+    return null;
+  }
 }
 
 export const findTaskById = async (id) => {

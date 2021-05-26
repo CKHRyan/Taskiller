@@ -29,8 +29,8 @@ import TaskEditor from './pages/taskManager/taskEditor';
 import Setting from './pages/Setting/setting';
 import About from './pages/Setting/about';
 import { TaskContext } from './data/context';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import { intialization, getAllTasks, sortTasks } from './service/taskManagement';
+import { reset } from './service/storage';
 
 const Stack = createStackNavigator();
 
@@ -46,11 +46,11 @@ const App = (props) => {
     let tasks = await getAllTasks();
     if (tasks) {
       setTaskList(tasks);
+      console.log(tasks);
     }
     else {
       await intialization();
     }
-    console.log(tasks);
   }, []);
 
   const horizontalAnimation = {
